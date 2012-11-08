@@ -11,8 +11,8 @@ Library is available in [Maven cental](http://repo1.maven.org/maven2/com/alexkas
 
 Javadocs for 1.0 release are available [here](http://alexkasko.github.com/springjdbc-iterable/javadocs),
 
-Problem
--------
+JdbcTemplate problem
+--------------------
 
 `JdbcTemplate` and `NamedParameterJdbcTemplate` do a great job as an abstraction layer over JDBC.
 Among other things they provide convenient methods to get a result set from DB as a List of app objects:
