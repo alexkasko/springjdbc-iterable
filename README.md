@@ -9,7 +9,7 @@ In runtime library has no additional dependencies (except spring-jdbc itself and
 
 Library is available in [Maven cental](http://repo1.maven.org/maven2/com/alexkasko/springjdbc/).
 
-Javadocs for the latest release are available [here](http://alexkasko.github.com/springjdbc-iterable/javadocs),
+Javadocs for the latest release are available [here](http://alexkasko.github.com/springjdbc-iterable/javadocs).
 
 JdbcTemplate problem
 --------------------
