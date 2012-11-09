@@ -8,7 +8,7 @@
     </parent>
     <groupId>com.alexkasko.springjdbc</groupId>
     <artifactId>springjdbc-iterable</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>Spring JdbcTemplate Iterable Extension Library</name>
 
@@ -48,7 +48,6 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-jdbc</artifactId>
             <version>3.0.2.RELEASE</version>
-            <scope>provided</scope>
         </dependency>
         <!--test-->
         <dependency>
