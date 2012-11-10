@@ -57,22 +57,16 @@ you should always call `close()` in `finally` block for the case of exception th
 In transactional environment (with any implementation of `PlatformTransactionManager`) open JDBC resources will
 be valid only within transaction bounds. So such iterators must be opened, used and closed within single transaction.
 
-How does it work
-----------------
-
-Proper JDBC resources releasing may be not easy (e.g. early connection releasing on error, resources may need unwrapping
-to use proprietary extensions, but on releasing you must use wrapped ones etc). `JdbcTemplate` supports many environments
-(`DriverManager`, connection pooling `JTA` etc) and has quite complex resource releasing process to support many cases with
-different requirements.
-
-`IterableJdbcTemplate` has the same query-execution code, as standard `JdbcTemplate`, but all resource-releasing code
-was moved into `CloseableIterator#close()` method. So, within transaction bounds, it makes no difference whether to use
-multiple iterators in the same method, or to use multiple `ResultSetExtractor`'s one inside the other (precisely speaking,
-in `IterableJdbcTemplate` `SQLWarning`'s are checked after query execution but before results reading, when in `JdbcTemplate`
-they are checked after all results are read before resource releasing; it may be fixed, but I think current variant is better).
-
 Library usage
 -------------
+
+Maven dependency (available in central repository):
+
+    <dependency>
+        <groupId>com.alexkasko.springjdbc</groupId>
+        <artifactId>springjdbc-iterable</artifactId>
+        <version>1.0.1</version>
+    </dependency>
 
 `IterableJdbcTemplate` extends standard `JdbcTemplate` providing additional method `queryForIter(...)`
 with many overloaded variants, covering all `queryForList(...)` and `query(...)` methods of `JdbcTemplate` that return `List`'s.
@@ -106,7 +100,32 @@ Usage example (contains spring transactions and injecting - they are not require
         }
     }
 
+How does it work
+----------------
+
+Proper JDBC resources releasing may be not easy (e.g. early connection releasing on error, resources may need unwrapping
+to use proprietary extensions, but on releasing you must use wrapped ones etc). `JdbcTemplate` supports many environments
+(`DriverManager`, connection pooling `JTA` etc) and has quite complex resource releasing process to support many cases with
+different requirements.
+
+`IterableJdbcTemplate` has the same query-execution code, as standard `JdbcTemplate`, but all resource-releasing code
+was moved into `CloseableIterator#close()` method. So, within transaction bounds, it makes no difference whether to use
+multiple iterators in the same method, or to use multiple `ResultSetExtractor`'s one inside the other (precisely speaking,
+in `IterableJdbcTemplate` `SQLWarning`'s are checked after query execution but before results reading, when in `JdbcTemplate`
+they are checked after all results are read before resource releasing; it may be fixed, but I think current variant is better).
+
 License information
 -------------------
 
 Library is provided under the terms of [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0)
+
+Changelog
+---------
+
+**1.0.1** (2012-11-09)
+
+ * make `spring-jdbc` compile-scoped dependendency
+
+**1.0** (2012-11-08)
+
+ * initial version
