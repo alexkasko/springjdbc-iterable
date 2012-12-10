@@ -117,7 +117,7 @@ they are checked after all results are read before resource releasing; it may be
 License information
 -------------------
 
-Library is provided under the terms of [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0)
+This project is released under the [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
 Changelog
 ---------
