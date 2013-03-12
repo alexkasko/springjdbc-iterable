@@ -32,6 +32,11 @@ public class IterableJdbcTemplate extends JdbcTemplate implements IterableJdbcOp
         super(dataSource);
     }
 
+    public IterableJdbcTemplate(DataSource dataSource, int fetchSize) {
+        this(dataSource);
+        setFetchSize(fetchSize);
+    }
+
     /**
      * Static method to use in finally methods for closing
      * {@link CloseableIterator}s. Writes warning into log on exception.
