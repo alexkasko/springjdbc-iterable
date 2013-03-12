@@ -24,6 +24,10 @@ public class IterableNamedParameterJdbcTemplate extends NamedParameterJdbcTempla
         super(new IterableJdbcTemplate(dataSource));
     }
 
+    public IterableNamedParameterJdbcTemplate(DataSource dataSource, int fetchSize) {
+        super(new IterableJdbcTemplate(dataSource, fetchSize));
+    }
+
     /**
      * {@inheritDoc}
      */
