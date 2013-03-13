@@ -1,17 +1,14 @@
 package com.alexkasko.springjdbc.iterable;
 
 import org.junit.Test;
-import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.apache.commons.io.IOUtils.closeQuietly;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -37,17 +34,27 @@ public class IterableNamedParameterJdbcTemplateTest {
         jt.getJdbcOperations().update("insert into foo(val) values('bar')");
         jt.getJdbcOperations().update("insert into foo(val) values('baz')");
 //        test static sql
-        CloseableIterator<String> iterStatic = jt.getIterableJdbcOperations().queryForIter(
-                        "select val from foo where val like 'b%' order by val",
-                        String.class);
-        validateIter(iterStatic);
+        CloseableIterator<String> iterStatic = null;
+        try {
+            iterStatic = jt.getIterableJdbcOperations().queryForIter(
+                    "select val from foo where val like 'b%' order by val",
+                    String.class);
+            validateIter(iterStatic);
+        } finally {
+            closeQuietly(iterStatic);
+        }
 //        test prepared statement (no guava in this project)
-        Map<String, String> params = new HashMap<String, String>();
-        params.put("val", "b%");
-        CloseableIterator<String> iterPrepared = jt.queryForIter(
-                "select val from foo where val like :val order by val",
-                params, String.class);
-        validateIter(iterPrepared);
+        CloseableIterator<String> iterPrepared = null;
+        try {
+            Map<String, String> params = new HashMap<String, String>();
+            params.put("val", "b%");
+            iterPrepared = jt.queryForIter(
+                    "select val from foo where val like :val order by val",
+                    params, String.class);
+            validateIter(iterPrepared);
+        } finally {
+            closeQuietly(iterPrepared);
+        }
     }
 
     private void validateIter(CloseableIterator<String> iter) {

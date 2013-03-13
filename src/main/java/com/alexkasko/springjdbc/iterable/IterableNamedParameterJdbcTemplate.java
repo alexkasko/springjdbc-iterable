@@ -20,10 +20,21 @@ import java.util.Map;
  */
 public class IterableNamedParameterJdbcTemplate extends NamedParameterJdbcTemplate implements IterableNamedParameterJdbcOperations {
 
+    /**
+     * Constructor
+     *
+     * @param dataSource data source
+     */
     public IterableNamedParameterJdbcTemplate(DataSource dataSource) {
         super(new IterableJdbcTemplate(dataSource));
     }
 
+    /**
+     * Constructor, takes {@code fetchSize}
+     *
+     * @param dataSource data source
+     * @param fetchSize <a href=http://static.springsource.org/spring/docs/3.0.x/api/org/springframework/jdbc/core/JdbcTemplate.html#setFetchSize%28int%29>fetchSize</a> property value
+     */
     public IterableNamedParameterJdbcTemplate(DataSource dataSource, int fetchSize) {
         super(new IterableJdbcTemplate(dataSource, fetchSize));
     }

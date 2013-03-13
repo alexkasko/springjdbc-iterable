@@ -13,6 +13,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.NoSuchElementException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Closable iterator implementation, returns mapped roes from provided result set.
@@ -39,7 +40,7 @@ class PreparedStatementCloseableIterator<T> implements CloseableIterator<T> {
 
     private State state = State.NOT_READY;
     private T next;
-    private boolean closed = false;
+    private AtomicBoolean closed = new AtomicBoolean(false);
     private int rowNum = 0;
 
     /**
@@ -108,7 +109,7 @@ class PreparedStatementCloseableIterator<T> implements CloseableIterator<T> {
      */
     @Override
     public void close() {
-        if(closed) return;
+        if(!closed.compareAndSet(false, true)) return;
         JdbcUtils.closeResultSet(wrappedRs);
         if(pss instanceof ParameterDisposer) {
             ((ParameterDisposer) pss).cleanupParameters();
@@ -118,7 +119,6 @@ class PreparedStatementCloseableIterator<T> implements CloseableIterator<T> {
         }
         JdbcUtils.closeStatement(ps);
         DataSourceUtils.releaseConnection(conn, ds);
-        closed = true;
     }
 
     /**
@@ -126,7 +126,7 @@ class PreparedStatementCloseableIterator<T> implements CloseableIterator<T> {
      */
     @Override
     public boolean isClosed() {
-        return closed;
+        return closed.get();
     }
 
     /**
@@ -135,7 +135,7 @@ class PreparedStatementCloseableIterator<T> implements CloseableIterator<T> {
     @Override
     protected void finalize() throws Throwable {
         super.finalize();
-        if(!closed) logger.warn("GC level message: iterator wasn't closed: [" + this + "]");
+        if(!closed.get()) logger.warn("GC level message: iterator wasn't closed: [" + this + "]");
     }
 
     /**
@@ -144,7 +144,7 @@ class PreparedStatementCloseableIterator<T> implements CloseableIterator<T> {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
-        sb.append("ResultSetCloseableIterator");
+        sb.append("PreparedStatementCloseableIterator");
         sb.append("{ds=").append(ds);
         sb.append(", conn=").append(conn);
         sb.append(", psc=").append(psc);
@@ -179,7 +179,7 @@ class PreparedStatementCloseableIterator<T> implements CloseableIterator<T> {
      * @throws SQLException on result set access problem
      */
     private T computeNextInternal() throws SQLException {
-        if(closed) return endOfData();
+        if(closed.get()) return endOfData();
         if(rsToUse.next()) return mapper.mapRow(rsToUse, rowNum++);
         close();
         return endOfData();

@@ -33,8 +33,8 @@ If you need to process big result set, that should not be fully loaded into memo
         }});
 
 This looks not such convenient, as previous example. But things become even worse when you need to load multiple big
-result sets and process them simultaniously. You may call `jt` another time in `ResultSetExtractor` and process
-its results in another `ResultSetExtractor` but java's syntax for closures made this no concise and separate classes or
+result sets and process them simultaneously. You may call `jt` another time in `ResultSetExtractor` and process
+its results in another `ResultSetExtractor` but java's syntax for closures made this not concise and separate classes or
 even real closures from java 8 won't help much.
 
 Solution
@@ -65,7 +65,7 @@ Maven dependency (available in central repository):
     <dependency>
         <groupId>com.alexkasko.springjdbc</groupId>
         <artifactId>springjdbc-iterable</artifactId>
-        <version>1.0.1</version>
+        <version>1.0.2</version>
     </dependency>
 
 `IterableJdbcTemplate` extends standard `JdbcTemplate` providing additional method `queryForIter(...)`
@@ -92,11 +92,10 @@ Usage example (contains spring transactions and injecting - they are not require
             // do some processing with Iterators.transform(...) etc
             ...
         } finally {
-            // release resources in case iterators wasn't exhasuted
+            // release resources in case iterators wasn't exhausted
             // and closed automatically or exception happened
-            // closeQuetly will catch and log any exception
-            IterableJdbcTemplate.closeQuetly(fooIter);
-            IterableJdbcTemplate.closeQuetly(barIter);
+            IOUtils.closeQuietly(fooIter);
+            IOUtils.closeQuietly(barIter);
         }
     }
 
@@ -122,9 +121,15 @@ This project is released under the [Apache License 2.0](http://www.apache.org/li
 Changelog
 ---------
 
+**1.0.2** (2013-05-13)
+
+ * add `fetchSize` to constructors
+ * make close checks atomic
+ * `CloseableIterator` now extends `java.io.Closeable`
+
 **1.0.1** (2012-11-09)
 
- * make `spring-jdbc` compile-scoped dependendency
+ * make `spring-jdbc` compile-scoped dependency
 
 **1.0** (2012-11-08)
 

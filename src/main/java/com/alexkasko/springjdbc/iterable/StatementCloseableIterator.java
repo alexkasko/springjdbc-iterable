@@ -10,6 +10,7 @@ import org.springframework.jdbc.support.JdbcUtils;
 import javax.sql.DataSource;
 import java.sql.*;
 import java.util.NoSuchElementException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Closable iterator implementation, returns mapped roes from provided result set.
@@ -34,7 +35,7 @@ class StatementCloseableIterator<T> implements CloseableIterator<T> {
 
     private State state = State.NOT_READY;
     private T next;
-    private boolean closed = false;
+    private AtomicBoolean closed = new AtomicBoolean(false);
     private int rowNum = 0;
 
     /**
@@ -97,11 +98,10 @@ class StatementCloseableIterator<T> implements CloseableIterator<T> {
      */
     @Override
     public void close() {
-        if(closed) return;
+        if(!closed.compareAndSet(false, true)) return;
         JdbcUtils.closeResultSet(wrappedRs);
         JdbcUtils.closeStatement(stmt);
         DataSourceUtils.releaseConnection(conn, ds);
-        closed = true;
     }
 
     /**
@@ -109,7 +109,7 @@ class StatementCloseableIterator<T> implements CloseableIterator<T> {
      */
     @Override
     public boolean isClosed() {
-        return closed;
+        return closed.get();
     }
 
     /**
@@ -118,7 +118,7 @@ class StatementCloseableIterator<T> implements CloseableIterator<T> {
     @Override
     protected void finalize() throws Throwable {
         super.finalize();
-        if(!closed) logger.warn("GC level message: iterator wasn't closed: [" + this + "]");
+        if(!closed.get()) logger.warn("GC level message: iterator wasn't closed: [" + this + "]");
     }
 
     /**
@@ -161,7 +161,7 @@ class StatementCloseableIterator<T> implements CloseableIterator<T> {
      * @throws java.sql.SQLException on result set access problem
      */
     private T computeNextInternal() throws SQLException {
-        if(closed) return endOfData();
+        if(closed.get()) return endOfData();
         if(rsToUse.next()) return mapper.mapRow(rsToUse, rowNum++);
         close();
         return endOfData();

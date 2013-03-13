@@ -1,5 +1,6 @@
 package com.alexkasko.springjdbc.iterable;
 
+import java.io.Closeable;
 import java.util.Iterator;
 
 /**
@@ -8,7 +9,7 @@ import java.util.Iterator;
  * @author alexkasko
  * Date: 11/7/12
  */
-public interface CloseableIterator<T> extends Iterator<T> {
+public interface CloseableIterator<T> extends Iterator<T>, Closeable {
 
     /**
      * Closes this iterator and releases JDBC resources associated

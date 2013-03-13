@@ -32,6 +32,12 @@ public class IterableJdbcTemplate extends JdbcTemplate implements IterableJdbcOp
         super(dataSource);
     }
 
+    /**
+     * Constructor, takes {@code fetchSize}
+     *
+     * @param dataSource data source
+     * @param fetchSize <a href=http://static.springsource.org/spring/docs/3.0.x/api/org/springframework/jdbc/core/JdbcTemplate.html#setFetchSize%28int%29>fetchSize</a> property value
+     */
     public IterableJdbcTemplate(DataSource dataSource, int fetchSize) {
         this(dataSource);
         setFetchSize(fetchSize);
@@ -40,9 +46,12 @@ public class IterableJdbcTemplate extends JdbcTemplate implements IterableJdbcOp
     /**
      * Static method to use in finally methods for closing
      * {@link CloseableIterator}s. Writes warning into log on exception.
+     * Since 1.2 <a href="http://commons.apache.org/proper/commons-io//javadocs/api-2.4/org/apache/commons/io/IOUtils.html#closeQuietly%28java.io.Closeable%29">IOUtils.closeQuietly()</a>
+     * may be used instead this one.
      *
      * @param iter iterator to close
      */
+    @Deprecated // use IOUtils.closeQuietly() instead
     public static void closeQuetly(CloseableIterator<?> iter) {
         try {
             if (iter != null) {
