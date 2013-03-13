@@ -121,7 +121,7 @@ This project is released under the [Apache License 2.0](http://www.apache.org/li
 Changelog
 ---------
 
-**1.0.2** (2013-05-13)
+**1.0.2** (2013-03-13)
 
  * add `fetchSize` to constructors
  * make close checks atomic
