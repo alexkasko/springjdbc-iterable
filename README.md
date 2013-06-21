@@ -65,7 +65,7 @@ Maven dependency (available in central repository):
     <dependency>
         <groupId>com.alexkasko.springjdbc</groupId>
         <artifactId>springjdbc-iterable</artifactId>
-        <version>1.0.2</version>
+        <version>1.0.3</version>
     </dependency>
 
 `IterableJdbcTemplate` extends standard `JdbcTemplate` providing additional method `queryForIter(...)`
@@ -120,6 +120,9 @@ This project is released under the [Apache License 2.0](http://www.apache.org/li
 
 Changelog
 ---------
+**1.0.3** (2013-06-22)
+
+ * `CloseableIterable` implementation added
 
 **1.0.2** (2013-03-13)
 
