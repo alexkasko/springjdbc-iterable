@@ -6,7 +6,6 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.*;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.support.JdbcUtils;
-import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
 import org.springframework.util.Assert;
 
 import javax.sql.DataSource;
@@ -90,28 +89,15 @@ public class IterableJdbcTemplate extends JdbcTemplate implements IterableJdbcOp
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
-            Connection conToUse = con;
-            NativeJdbcExtractor nje = getNativeJdbcExtractor();
-            if(nje != null && nje.isNativeConnectionNecessaryForNativePreparedStatements()) {
-                conToUse = nje.getNativeConnection(con);
-            }
-            ps = psc.createPreparedStatement(conToUse);
+            ps = psc.createPreparedStatement(con);
             applyStatementSettings(ps);
-            PreparedStatement psToUse = ps;
-            if(nje != null) {
-                psToUse = nje.getNativePreparedStatement(ps);
-            }
             if(pss != null) {
-                pss.setValues(psToUse);
+                pss.setValues(ps);
             }
-            rs = psToUse.executeQuery();
-            ResultSet rsToUse = rs;
-            if(nje != null) {
-                rsToUse = nje.getNativeResultSet(rs);
-            }
+            rs = ps.executeQuery();
             // warnings are handled after query execution but before data access
             handleWarnings(ps);
-            return new PreparedStatementCloseableIterator<T>(ds, con, psc, pss, ps, rs, rsToUse, rowMapper);
+            return new PreparedStatementCloseableIterator<T>(ds, con, psc, pss, ps, rs, rowMapper);
         } catch(SQLException ex) {
             // Release Connection early, to avoid potential connection pool deadlock
             // in the case when the exception translator hasn't been initialized yet.
@@ -150,25 +136,12 @@ public class IterableJdbcTemplate extends JdbcTemplate implements IterableJdbcOp
         Statement stmt = null;
         ResultSet rs = null;
         try {
-            Connection conToUse = con;
-            NativeJdbcExtractor nje = getNativeJdbcExtractor();
-            if(nje != null && nje.isNativeConnectionNecessaryForNativeStatements()) {
-                conToUse = nje.getNativeConnection(con);
-            }
-            stmt = conToUse.createStatement();
+            stmt = con.createStatement();
             applyStatementSettings(stmt);
-            Statement stmtToUse = stmt;
-            if(nje != null) {
-                stmtToUse = nje.getNativeStatement(stmt);
-            }
-            rs = stmtToUse.executeQuery(sql);
-            ResultSet rsToUse = rs;
-            if(nje != null) {
-                rsToUse = nje.getNativeResultSet(rs);
-            }
+            rs = stmt.executeQuery(sql);
             // warnings are handled after query execution but before data access
             handleWarnings(stmt);
-            return new StatementCloseableIterator<T>(ds, con, stmt, rs, rsToUse, rowMapper);
+            return new StatementCloseableIterator<T>(ds, con, stmt, rs, rowMapper);
         } catch(SQLException ex) {
             JdbcUtils.closeResultSet(rs);
             rs = null;
