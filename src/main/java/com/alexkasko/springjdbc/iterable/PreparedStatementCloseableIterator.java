@@ -32,8 +32,7 @@ class PreparedStatementCloseableIterator<T> implements CloseableIterator<T> {
     private final PreparedStatementCreator psc;
     private final PreparedStatementSetter pss;
     private final PreparedStatement ps;
-    private final ResultSet wrappedRs;
-    private final ResultSet rsToUse;
+    private final ResultSet rs;
     private final RowMapper<T> mapper;
 
     private enum State {READY, NOT_READY, DONE, FAILED}
@@ -50,20 +49,18 @@ class PreparedStatementCloseableIterator<T> implements CloseableIterator<T> {
      * @param conn provided here for proper JDBC resources releasing
      * @param psc provided here for proper JDBC resources releasing
      * @param ps provided here for proper JDBC resources releasing
-     * @param wrappedRs provided here for proper JDBC resources releasing
-     * @param rsToUse result set to iterate over
+     * @param rs result set to iterate over
      * @param mapper row mapper to use
      */
     PreparedStatementCloseableIterator(DataSource ds, Connection conn, PreparedStatementCreator psc,
                                        PreparedStatementSetter pss, PreparedStatement ps,
-                                       ResultSet wrappedRs, ResultSet rsToUse, RowMapper<T> mapper) {
+                                       ResultSet rs, RowMapper<T> mapper) {
         this.ds = ds;
         this.conn = conn;
         this.psc = psc;
         this.pss = pss;
         this.ps = ps;
-        this.wrappedRs = wrappedRs;
-        this.rsToUse = rsToUse;
+        this.rs = rs;
         this.mapper = mapper;
     }
 
@@ -110,7 +107,7 @@ class PreparedStatementCloseableIterator<T> implements CloseableIterator<T> {
     @Override
     public void close() {
         if(!closed.compareAndSet(false, true)) return;
-        JdbcUtils.closeResultSet(wrappedRs);
+        JdbcUtils.closeResultSet(rs);
         if(pss instanceof ParameterDisposer) {
             ((ParameterDisposer) pss).cleanupParameters();
         }
@@ -149,8 +146,7 @@ class PreparedStatementCloseableIterator<T> implements CloseableIterator<T> {
         sb.append(", conn=").append(conn);
         sb.append(", psc=").append(psc);
         sb.append(", ps=").append(ps);
-        sb.append(", wrappedRs=").append(wrappedRs);
-        sb.append(", rsToUse=").append(rsToUse);
+        sb.append(", rs=").append(rs);
         sb.append(", mapper=").append(mapper);
         sb.append(", closed=").append(closed);
         sb.append(", rowNum=").append(rowNum);
@@ -180,7 +176,7 @@ class PreparedStatementCloseableIterator<T> implements CloseableIterator<T> {
      */
     private T computeNextInternal() throws SQLException {
         if(closed.get()) return endOfData();
-        if(rsToUse.next()) return mapper.mapRow(rsToUse, rowNum++);
+        if(rs.next()) return mapper.mapRow(rs, rowNum++);
         close();
         return endOfData();
     }
