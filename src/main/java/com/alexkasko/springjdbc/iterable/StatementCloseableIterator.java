@@ -27,7 +27,6 @@ class StatementCloseableIterator<T> implements CloseableIterator<T> {
     private final DataSource ds;
     private final Connection conn;
     private final Statement stmt;
-    private final ResultSet wrappedRs;
     private final ResultSet rsToUse;
     private final RowMapper<T> mapper;
 
@@ -44,15 +43,13 @@ class StatementCloseableIterator<T> implements CloseableIterator<T> {
      * @param ds provided here for proper JDBC resources releasing
      * @param conn provided here for proper JDBC resources releasing
      * @param stmt provided here for proper JDBC resources releasing
-     * @param wrappedRs provided here for proper JDBC resources releasing
      * @param rsToUse result set to iterate over
      * @param mapper row mapper to use
      */
-    StatementCloseableIterator(DataSource ds, Connection conn, Statement stmt, ResultSet wrappedRs, ResultSet rsToUse, RowMapper<T> mapper) {
+    StatementCloseableIterator(DataSource ds, Connection conn, Statement stmt, ResultSet rsToUse, RowMapper<T> mapper) {
         this.ds = ds;
         this.conn = conn;
         this.stmt = stmt;
-        this.wrappedRs = wrappedRs;
         this.rsToUse = rsToUse;
         this.mapper = mapper;
     }
@@ -99,7 +96,7 @@ class StatementCloseableIterator<T> implements CloseableIterator<T> {
     @Override
     public void close() {
         if(!closed.compareAndSet(false, true)) return;
-        JdbcUtils.closeResultSet(wrappedRs);
+        JdbcUtils.closeResultSet(rsToUse);
         JdbcUtils.closeStatement(stmt);
         DataSourceUtils.releaseConnection(conn, ds);
     }
@@ -131,7 +128,6 @@ class StatementCloseableIterator<T> implements CloseableIterator<T> {
         sb.append("{ds=").append(ds);
         sb.append(", conn=").append(conn);
         sb.append(", stmt=").append(stmt);
-        sb.append(", wrappedRs=").append(wrappedRs);
         sb.append(", rsToUse=").append(rsToUse);
         sb.append(", mapper=").append(mapper);
         sb.append(", closed=").append(closed);
